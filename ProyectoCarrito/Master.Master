@@ -1,0 +1,543 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Master.master.cs" Inherits="ProyectoCarrito.Master" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Maxi Market</title>
+    <link rel="icon" href="img/icono.png" type="image/png" sizes="60x60" />
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+    <%-- Css --%>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://kit.fontawesome.com/e5fd6936bc.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+
+    <%-- Código para establecer el valor de MostrarFiltros --%>
+
+
+    <% if (Request.Url.AbsolutePath.EndsWith("Default.aspx"))
+        { %>
+    <%
+        MostrarFiltros = true;
+    %>
+    <% }
+        else
+        { %>
+    <%
+        MostrarFiltros = false;
+    %>
+    <% } %>
+
+
+    <% if (Request.Url.AbsolutePath.EndsWith("Carrito.aspx"))
+        { %>
+    <%
+        MostrarCarrito = true;
+    %>
+    <% }
+        else
+        { %>
+    <%
+        MostrarCarrito = false;
+    %>
+    <% } %>
+
+    <style>
+        #footer {
+            position: relative;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+           
+            background-color: black;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <form id="form1" runat="server">
+
+        <%-- Nav bar --%>
+        <asp:ContentPlaceHolder ID="NavContent" runat="server">
+            <nav class="navbar navbar-expand-lg  fixed-top navbar-light " Id="barNav" runat="server">
+                <div class="container-fluid ">
+                    
+                   <%-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse navbar-dark" id="navbarSupportedContent">
+                        
+                        
+
+                    </div>--%>
+
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navBar">
+                            <li class="nav-item">
+                                <a class="nav-link active text-white" aria-current="page" href="Default.aspx">Home</a>
+                            </li>
+                           
+
+                            <%--SOLO MOSTRAMOS FILTROS AVANZADOS SI ESTAMOS EN DEFAULT--%>
+                            <%if (MostrarFiltros == true)
+                                {
+
+                            %>
+                            <li class="nav-item">
+
+                                <a class="nav-link active text-white" runat="server" id="filtroAvanzado" aria-current="page" href="Default.aspx" style="margin-right: 25px;" onclick="return toggleFiltros();">Filtros avanzados</a>
+                            </li>
+                            <%} %>
+                        </ul>
+                        <%--<form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>--%>
+                        <%--  filtro--%>
+
+
+                        <div class="buscar">
+                            <div class="d-flex barraBuscar">
+                                    <asp:TextBox runat="server" ID="txtBuscador" class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar" onkeydown="return enter(event)">
+                            </asp:TextBox>
+                        
+                        <asp:LinkButton Text="Buscar" runat="server" ID="btnBuscar" CssClass="btn btn-outline-light" OnClick="btnBuscar_Click">
+                        <i class="fas fa-search"></i>
+                        </asp:LinkButton>
+
+                            </div>
+                        
+                            </div>
+
+
+
+                        <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+                        <asp:UpdatePanel ID="panelContador" runat="server" UpdateMode="Conditional">
+                            <ContentTemplate>
+                                <%-- Icono Carrito --%>
+                               
+                                <div class="cart-wrapper">
+
+                                    <%if (MostrarCarrito == false)
+                                        {
+                                    %>
+                                        <a class="nav-link active text-white" aria-current="page" href="#" onclick="desplazarCarrito(event)">
+                                        <i id="iconoCarrito" class="fas fa-shopping-cart"></i>
+                                        <span id="txtCarrito">Carrito </span>
+                                        <asp:Label ID="lblTotalCantCarrito" runat="server"></asp:Label>
+                                    </a>
+                                    
+
+                                    <%} %>
+                                </div>
+                                    
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
+
+
+
+
+                        <%-- Mini barra carrito --%>
+                        <div id="miniCartContainer" class="mini-cart-container ">
+                            <iframe id="miniCarritoFrame" frameborder="0" scrolling="no" style="width: 33%; height: 100%;"></iframe>
+                        </div>
+
+
+
+                    
+                </div>
+            </nav>
+        </asp:ContentPlaceHolder>
+
+        <%-- Mensaje Art. agregado --%>
+        <div id="mensajeCarritoo">
+        </div>
+
+        <br />
+        <br />
+        <br />
+
+
+        <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
+        </asp:ContentPlaceHolder>
+
+
+        <div class="container" id="content">
+            <div>
+
+                <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                </asp:ContentPlaceHolder>
+
+            </div>
+
+        </div>
+    </form>
+
+
+
+    <div id="footer">
+       
+
+            <footer class=" text-center text-white" >
+                <!-- Grid container -->
+                <div class="container p-4 pb-0">
+                    <!-- Section: Social media -->
+                    <section class="mb-4">
+                         
+                        <h3>GitHubs del Equipo</h3>
+                        <!-- Github -->
+                        <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/joacoaldun?tab=repositories" role="button"> Joaquín Alduncin   <i class="fab fa-github"></i></a>
+                         <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/NoeliaSouza?tab=repositories" role="button"> Noelia Afonso De Souza   <i class="fab fa-github"></i></a>
+                         <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/JuanLorenzo89?tab=repositories" role="button"> Juan Palbo Lorenzo   <i class="fab fa-github"></i></a>
+                    </section>
+                    <!-- Section: Social media -->
+                </div>
+                <!-- Grid container -->
+
+               
+                <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+                    © 2023 Copyright: Equipo 26- Joaquín Alduncin, Noelia Afonso de Souza, Juan Pablo Lorenzo.
+    
+                </div>
+                
+            </footer>
+
+        
+    </div>
+
+
+    <%-- Javascript --%>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/88527ccdba.js" crossorigin="anonymous"></script>
+
+
+
+
+</body>
+
+</html>
+
+
+<%-- CSS --%>
+<style>
+    .navbar {
+        background-color: black;
+    }
+
+    .cart-wrapper {
+        display: flex;
+        align-items: center;
+        margin-left: 30px;
+        margin-right: 10px;
+    }
+
+    .cart-details {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        /*background-color: white;*/
+        background-color: black;
+        color: white;
+        padding: 10px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+    /*Acomodamos la parte del carrito*/
+    .nav-link {
+        display: flex;
+    }
+
+    #iconoCarrito {
+        margin-right: 10px;
+    }
+
+    /*Vaciamos la carta de detalle*/
+    .cart-details {
+        display: none;
+    }
+
+        .cart-details.show {
+            display: block;
+        }
+
+    #contCarrito {
+        margin-left: 5px;
+    }
+
+    /* efecto?? */
+    body {
+        /*background-color: #170b2a;*/
+        /*background-color: #8a8eab;*/
+        /*background-color: #778899;*/
+        /*background-color:#60904a;*/
+        /*background-color:black;*/
+        background-image: url("img/fondoWeb.png");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        /*background-image: linear-gradient(to right, #4bb169, #b7b252);*/
+    }
+
+
+
+    .container {
+        min-height: 100%;
+        position: relative;
+        padding-bottom: 60px; /* Altura del footer */
+    }
+
+    /*.buscar {
+        margin-right: 1rem;
+        width: 25%;
+    }*/
+
+
+    /* Barra mini carrito */
+    .mini-cart-container {
+        width: 1600px;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        right: 0;
+        transition: transform 0.3s ease-out;
+        transform: translateX(100%);
+        z-index: 9999;
+        margin-left: auto;
+    }
+
+        .mini-cart-container.active {
+            transform: translateX(75%);
+        }
+
+    /* Mensaje carrito */
+    #mensajeCarritoo {
+        color: white;
+        background-color: green;
+        position: fixed;
+        top: 6vh;
+        right: 0.5vh;
+        display: none;
+        padding: 10px;
+        z-index: 1;
+    }
+
+
+
+    /*Animacion del boton buscar*/
+    @keyframes fa-beat {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .fa-beat {
+        animation: fa-beat 1s infinite;
+    }
+
+    #txtBuscador {
+        background-color: black;
+    }
+   
+    #footer{
+        background-color:#020202a1;
+    }
+
+    
+
+    @media (max-width: 549px){
+        .cart-wrapper{
+            margin-left:0.2vh;
+            margin-top:0vh;
+        }
+        #mensajeCarritoo{
+            margin-top:9.2vh;
+        }
+    }
+
+    @media (max-width: 768px){
+        .barraBuscar{
+            width:80%;
+        }
+    }
+
+
+
+    @media (min-width:550px) and (max-width:587px){
+         #mensajeCarritoo{
+            margin-top:9vh;
+        }
+    }
+     @media (min-width:588px) and (max-width:901px){
+         #mensajeCarritoo{
+            margin-top:6vh;
+        }
+    }
+
+      @media (min-width:902px) and (max-width:991px) {
+         #mensajeCarritoo{
+            margin-top:5vh;
+        }
+    }
+
+       @media (min-width:992px) {
+         #mensajeCarritoo{
+            margin-top:0.5vh;
+        }
+         .cart-wrapper{
+             margin-left:1vh;
+         }
+    }
+
+   
+</style>
+
+
+<%-- JAVASCRIPT --%>
+<%--animacion del boton buscar--%>
+<%--<script>
+    document.getElementById('<%= btnBuscar.ClientID %>').addEventListener('mouseover', function() {
+    this.querySelector('.fa-search').classList.add('fa-beat');
+  });
+
+  document.getElementById('<%= btnBuscar.ClientID %>').addEventListener('mouseout', function () {
+        this.querySelector('.fa-search').classList.remove('fa-beat');
+    });
+</script>--%>
+
+
+<script>
+
+
+
+
+    <%-- Hacemos click en carrito y aparece el detalle de lo agregado! --%>
+    function desplazarCarrito(event) {
+        event.preventDefault(); // Evita la acción predeterminada del evento
+
+
+
+        var miniCartContainer = document.getElementById('miniCartContainer');
+
+        if (miniCartContainer.classList.contains('active')) {
+            miniCartContainer.style.transform = 'translateX(100%)';
+            setTimeout(function () {
+                miniCartContainer.style.display = 'none';
+            }, 300);
+        } else {
+            miniCartContainer.style.display = 'block';
+            miniCartContainer.style.transform = 'translateX(20)';
+
+        }
+
+        miniCartContainer.classList.toggle('active');
+
+        var miniCarritoFrame = document.getElementById('miniCarritoFrame');
+        miniCarritoFrame.src = 'miniCarrito.aspx';
+
+    }
+
+    /* Para que no tener que recargar la pagina para volver a poder abrir y cerrar el carrito */
+    window.addEventListener('message', function (event) {
+        if (event.data === 'cerrarMiniCartContainer') {
+            var miniCartContainer = document.getElementById('miniCartContainer');
+            miniCartContainer.style.display = 'none';
+            miniCartContainer.classList.remove('active');
+
+        }
+    });
+
+    function toggleFiltros() {
+    <%-- Verifica si MostrarFiltros es verdadero --%>
+    <% if (MostrarFiltros)
+    { %>
+        // Obtén una referencia a la barra lateral en la página Default.aspx
+        var filtros = document.getElementById('<%= ContentPlaceHolder1.FindControl("filtros").ClientID %>');
+
+        // Verifica si el elemento existe
+        if (filtros) {
+            // Cambia el estado de visualización de la barra lateral
+            if (filtros.style.display === 'none') {
+                filtros.style.display = 'block';
+            } else {
+                filtros.style.display = 'none';
+            }
+        }
+    <% } %>
+        return false;
+    }
+
+    //enter
+    function enter(event) {
+        if (event.keyCode === 13) { // 13 es el codigo de la tecla enter
+            event.preventDefault();
+            document.getElementById('<%= btnBuscar.ClientID %>').click(); // llamamos al click
+            return false;
+        }
+    }
+
+
+    function adjustContentHeight() {
+        var content = document.getElementById('content');
+        var windowHeight = window.innerHeight;
+        var footerHeight = document.getElementById('footer').offsetHeight;
+        var contentHeight = windowHeight - footerHeight;
+        content.style.minHeight = contentHeight + 'px';
+    }
+
+    window.addEventListener('resize', adjustContentHeight);
+    adjustContentHeight();
+
+
+</script>
+
+
+
+<%-- Agregar articulos al carrito --%>
+<script>
+    var contCesta = 0;
+
+    function sumarAlCarrito() {
+        contCesta++;
+        var contElementosCesta = document.getElementById("contCarrito");
+        contElementosCesta.textContent = "(" + contCesta + ")";
+
+        /* Agregamos mensajito */
+        var mensaje = document.getElementById("mensajeCarritoo");
+        mensaje.textContent = "Artículo agregado";
+
+        mensaje.style.display = "block";
+
+
+        setTimeout(function () {
+            mensaje.style.display = "none";
+
+        }, 4000);
+
+
+    }
+
+    // Agregar un evento al enlace "Agregar al carrito". Luego sumarAlCarrito suma 1 al contador
+    var btnAgregarCesta = document.querySelectorAll(".btn.btn-success");
+    btnAgregarCesta.forEach(function (button) {
+        button.addEventListener("click", sumarAlCarrito);
+    });
+
+
+
+
+</script>
